@@ -28,7 +28,6 @@ class RedshiftOperator(BaseOperator):
 
     @apply_defaults
     def __init__(self, conn_dict, sql_command, *args, **kwargs):
-        self.redshift = psycopg2.connect(**conn_dict)
         super(RedshiftOperator, self).__init__(*args, **kwargs)
         self.sql_command = sql_command
 
@@ -38,10 +37,11 @@ class RedshiftOperator(BaseOperator):
         ).decode('utf-8')[:100].encode('utf-8')
         logging.info('Executing: ' + str(short))
 
+        redshift = psycopg2.connect(**conn_dict)
         result = None
-        with self.redshift.cursor() as c:
+        with redshift.cursor() as c:
             result = c.execute(self.sql_command)
-        self.redshift.commit()
+        redshift.commit()
         logging.info(str(result)[:100])
         return str(result)
 
@@ -68,7 +68,6 @@ class RedshiftToExcelOperator(BaseOperator):
             sheet_names=None,
             cols_group=None,
             *args, **kwargs):
-        self.redshift = psycopg2.connect(**conn_dict)
         super(RedshiftToExcelOperator, self).__init__(*args, **kwargs)
         self.sql_list = sql_list if isinstance(sql_list, list) else [sql_list]
         self.excel_file = excel_file
@@ -76,6 +75,8 @@ class RedshiftToExcelOperator(BaseOperator):
         self.cols_group = cols_group if isinstance(cols_group, list) else [cols_group]
 
     def execute(self, context):
+        self.redshift = psycopg2.connect(**conn_dict)
+
         writer = pd.ExcelWriter(self.excel_file)
         for i, sql_command in enumerate(self.sql_list):
             short = sql_command.decode(
