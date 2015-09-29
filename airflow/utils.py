@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta  # for doctest
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from email.header import Header
 import errno
 from functools import wraps
 import imp
@@ -404,10 +405,10 @@ def send_email(to, subject, html_content, files=None):
             to = [to]
 
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
+    msg['Subject'] = Header(subject, 'utf-8')
     msg['From'] = SMTP_MAIL_FROM
     msg['To'] = ", ".join(to)
-    mime_text = MIMEText(html_content, 'html')
+    mime_text = MIMEText(html_content, 'html', _charset='utf-8')
     msg.attach(mime_text)
 
     for fname in files or []:
