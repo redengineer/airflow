@@ -23,6 +23,7 @@ class RedshiftOperator(BaseOperator):
     :param sql_command: sql command str
     :type sql_command: str
     """
+    template_fields = ('sql_command',)
     ui_color = '#ededed'
 
     @apply_defaults
@@ -39,8 +40,8 @@ class RedshiftOperator(BaseOperator):
 
         result = None
         with self.redshift.cursor() as c:
-            c.execute(self.sql_command)
-            result = c.fetchall()
+            result = c.execute(self.sql_command)
+        self.redshift.commit()
         logging.info(str(result)[:100])
         return str(result)
 
