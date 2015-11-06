@@ -414,11 +414,9 @@ def send_email(to, subject, html_content, files=None):
     for fname in files or []:
         basename = os.path.basename(fname)
         with open(fname, "rb") as f:
-            msg.attach(MIMEApplication(
-                f.read(),
-                Content_Disposition='attachment; filename="%s"' % basename,
-                Name=basename
-            ))
+            part = MIMEApplication(f.read())
+            part.add_header('Content-Disposition', 'attachment', filename=basename)
+            msg.attach(part)
 
     send_MIME_email(SMTP_MAIL_FROM, to, msg)
 
